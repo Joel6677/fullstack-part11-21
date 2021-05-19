@@ -34,7 +34,7 @@ jobs:
         uses: cypress-io/github-action@v2
         with:
           command: npm run test:e2e
-          start: cd .. && npm run start
+          start: cd .. && npm start
           wait-on: http://localhost:3001
           working-directory: './redux-anecdotes'
       - name: heroku deploy
