@@ -27,17 +27,18 @@ jobs:
       - name: build frontend
         working-directory: './redux-anecdotes'
         run: npm run build
-      - name: move muild to backend
+      - name: move build to backend
         working-directory: './redux-anecdotes'
         run: cp -r build ..
       - name: e2e tests
         uses: cypress-io/github-action@v2
         with:
           command: npm run test:e2e
-          start: npm run start-prod
+          start: cd .. && npm run start
           wait-on: http://localhost:3001
+          working-directory: './redux-anecdotes'
       - name: heroku deploy
-        if: ${{ github.event_name == 'push' && !contains(join(toJson(github.event.commits.*.message)), '#skip') }}
+        # if: ${{ github.event_name == 'push' && !contains(join(toJson(github.event.commits.*.message)), '#skip') }}
         uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
