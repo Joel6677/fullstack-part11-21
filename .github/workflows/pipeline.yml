@@ -1,0 +1,48 @@
+name: Deployment pipeline
+
+on:
+  push:
+    branches:
+      - master
+    pull_request:
+      branches: [master]
+      types: [opened, synchronize]
+      
+jobs:
+  simple_deployment_pipeline:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: npm install backend
+        run: npm install
+      - name: npm install frontend
+        working-directory: './redux-anecdotes'
+        run: npm install
+      - name: lint
+        working-directory: './redux-anecdotes'
+        run: npm run lint
+      - name: build frontend
+        working-directory: './redux-anecdotes'
+        run: npm run build
+      - name: move muild to backend
+        working-directory: './redux-anecdotes'
+        run: cp -r build ..
+      - name: e2e tests
+        uses: cypress-io/github-action@v2
+        with:
+          command: npm run test:e2e
+          start: npm run start-prod
+          wait-on: http://localhost:3001
+      - name: heroku deploy
+        if: ${{ github.event_name == 'push' && !contains(join(toJson(github.event.commits.*.message)), '#skip') }}
+        uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: "my-redux-anecdotes" #Must be unique in Heroku
+          heroku_email: "joel.heusala@gmail.com"
+          healthcheck: "https://my-redux-anecdotes.herokuapp.com/health"
+          checkstring: "ok"
+          rollbackonhealthcheckfailed: true

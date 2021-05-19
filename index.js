@@ -125,6 +125,15 @@ app.put('/api/anecdotes/:id', (request, response) => {
     response.json(anecdotes)
 })
 
+app.get('/health', (req, res) => {
+  res.send('ok')
+})
+
+app.get('/version', (req, res) => {
+  res.send('1') // change this string to ensure a new version deployed
+})
+
+
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
